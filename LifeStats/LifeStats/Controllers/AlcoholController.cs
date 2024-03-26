@@ -39,11 +39,11 @@ namespace LifeStats.Controllers
 
             //Return DTOs
 
-            return Ok(drinksDto );
+            return Ok(drinksDto);
         }
 
         [HttpPost]
-        public IActionResult Create([FromBody] AddRecordAcloholDto addRecordAcloholDto )
+        public IActionResult Create([FromBody] AddRecordAcloholDto addRecordAcloholDto)
         {
             // Map or Covert DTO to Domain Model
             var drink = new Alcohol
@@ -67,9 +67,71 @@ namespace LifeStats.Controllers
                 DateTime = drink.DateTime,
             };
 
-            return CreatedAtAction(nameof(GetAll), new { id = drink.Id}, drinkDto) ;
+            return CreatedAtAction(nameof(GetAll), new { id = drink.Id }, drinkDto);
             // Use domain Model to create record
         }
+
+        [HttpPut]
+        [Route("{id:guid}")]
+        public IActionResult Update([FromRoute] Guid id, [FromBody] UpdateAlcoholDto updateAlcoholDto)
+        {
+            // check if record exists
+            var alcoholDomainModel = dbContext.Alcohol.FirstOrDefault(x => x.Id == id);
+
+            if (alcoholDomainModel == null)
+            {
+                return NotFound();
+            }
+
+            // Map DTO to Domain model 
+            alcoholDomainModel.Name = updateAlcoholDto.Name;
+            alcoholDomainModel.Percentage = updateAlcoholDto.Percentage;
+            alcoholDomainModel.AmountMl = updateAlcoholDto.AmountMl;
+            alcoholDomainModel.DateTime = updateAlcoholDto.DateTime;
+
+            dbContext.SaveChanges();
+
+            // Conver Domain Model to DTO
+            var alcoholDto = new AlcoholDto
+            {
+                Id = alcoholDomainModel.Id,
+                Name = alcoholDomainModel.Name,
+                Percentage = alcoholDomainModel.Percentage,
+                AmountMl = alcoholDomainModel.AmountMl,
+                DateTime = alcoholDomainModel.DateTime,
+            };
+            return Ok(alcoholDto);
+        }
+
+        [HttpDelete]
+        [Route("{id:guid}")]
+        public IActionResult Delete([FromRoute] Guid id)
+        {
+            var alcoholDomainModel = dbContext.Alcohol.FirstOrDefault(x => x.Id == id);
+
+            if (alcoholDomainModel == null)
+            {
+                return NotFound();
+            }
+
+
+            // Delete
+            dbContext.Alcohol.Remove(alcoholDomainModel);
+            dbContext.SaveChanges();
+
+            var alcoholDto = new AlcoholDto
+            {
+                Id = alcoholDomainModel.Id,
+                Name = alcoholDomainModel.Name,
+                Percentage = alcoholDomainModel.Percentage,
+                AmountMl = alcoholDomainModel.AmountMl,
+                DateTime = alcoholDomainModel.DateTime,
+            };
+            return Ok(alcoholDto);
+
+
+        }
+
 
     }
 }
