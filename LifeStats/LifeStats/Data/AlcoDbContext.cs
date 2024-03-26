@@ -11,6 +11,6 @@ namespace LifeStats.Data
         }
 
         public DbSet<Alcohol> Alcohol { get; set; }
-
+         
     }
 }
